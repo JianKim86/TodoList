@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorAccent">#D81B60</color>
+    <color name="colorNavHeader">#6da3e0</color>
+    <color name="colorWhite">#fff</color>
+    <color name="colorAlpa">#00ffffff</color>
+
+    <color name="colorBlack">#000</color>
+    <color name="colorDarkGray">#353535</color>
+    <color name="colorDeepBlue">#3a5778</color>
+    <color name="colorShadowBlue">#5781B1</color>
+    <color name="colorPoint">#6da3e0</color>
+    <color name="colorTrandPoint">#5A7CBD</color>
+    <color name="colorTrandPointShadow">#4e6fa3</color>
+    <color name="colorligntBlue">#aed1fa</color>
+    <color name="colorligntBlueL">#33aed1fa</color>
+
+    <color name="colorGrayll">#f9f9f9</color>
+    <color name="colorGrayl">#d6d7d7</color>
+    <color name="colorGray">#c8c8c8</color>
+    <color name="colorGraym">#b1b1b1</color>
+
+</resources>

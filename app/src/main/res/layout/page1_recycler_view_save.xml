@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="2dp"
+    app:contentPaddingTop="2dp"
+    app:contentPaddingBottom="2dp"
+    app:cardElevation="0dp"
+    android:id="@+id/cl_footer"
+    android:background="@color/colorAlpa"
+    android:clickable="true"
+    >
+    <Button
+        android:id="@+id/list_btn_save"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="save"
+        android:textStyle="bold"
+        android:visibility="gone"
+        />
+  </android.support.v7.widget.CardView>
