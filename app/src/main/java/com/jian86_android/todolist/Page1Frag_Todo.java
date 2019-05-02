@@ -74,6 +74,7 @@ public class Page1Frag_Todo extends Fragment implements TextView.OnEditorActionL
         action_addbtn= view.findViewById(R.id.action_addbtn);
         showEmptymsg();
         tvSetSum();
+        if(G.getTodoDatas()!=null&&G.getTodoDatas().size()!=0){checklists=G.getTodoDatas();}
         adapter = new CheckListAdapter(checklists, context, this);
         recyclerView.setAdapter(adapter);
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new Page1_ItemTouchHelperCallback(adapter));
@@ -145,6 +146,7 @@ public class Page1Frag_Todo extends Fragment implements TextView.OnEditorActionL
             clickItemCount=0;
         }else{
             totalCount =adapter.getItemCount()-1;
+
             clickItemCount= adapter.requestCountCheck();
         }
 
@@ -162,6 +164,7 @@ public class Page1Frag_Todo extends Fragment implements TextView.OnEditorActionL
         Page1_listItem item = new Page1_listItem(et.getText().toString());
         checklists.add(item);
         adapter.notifyDataSetChanged();
+        setDataforG(checklists);
         ((MainActivity)getActivity()).showToolbar();
         hideKeyboard();
         finishAddEt();
@@ -214,9 +217,9 @@ public class Page1Frag_Todo extends Fragment implements TextView.OnEditorActionL
         emptyView.setVisibility(View.GONE);
     }
 
-    void notifyList(){ adapter.notifyDataSetChanged(); }
+    void notifyList(){ adapter.notifyDataSetChanged();  setDataforG(checklists); }
     public void showEmptymsg(){
-        if (checklists.isEmpty()) {
+        if (G.getTodoDatas()==null||G.getTodoDatas().size()==0) {
             recyclerView.setVisibility(View.GONE);
             emptyView.setVisibility(View.VISIBLE);
         }
@@ -285,6 +288,7 @@ public class Page1Frag_Todo extends Fragment implements TextView.OnEditorActionL
                     tvSetSum();
                     clickAddBtn();
                     adapter.notifyDataSetChanged();
+                    setDataforG(checklists);
                 }
             }).setNegativeButton("cencel",null).create().show();
 
@@ -308,4 +312,14 @@ public class Page1Frag_Todo extends Fragment implements TextView.OnEditorActionL
         }
         return true;
     }
+
+    //G에 값저장
+    private void setDataforG(ArrayList<Page1_listItem> listItems){
+        if(listItems==null || listItems.size()==0){
+            G.setTodoDatas(null);
+            return;
+        }
+        G.setTodoDatas(listItems);
+    }//setStatics
+
 }//Page1Frag_Todo

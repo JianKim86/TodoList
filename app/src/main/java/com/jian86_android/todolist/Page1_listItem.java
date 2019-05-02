@@ -33,4 +33,9 @@ public class Page1_listItem {
         this.desc = desc;
         this.isCheck =false;
     }
+
+    public Page1_listItem(String desc, boolean isCheck) {
+        this.desc = desc;
+        this.isCheck = isCheck;
+    }
 }//Page1_listItem

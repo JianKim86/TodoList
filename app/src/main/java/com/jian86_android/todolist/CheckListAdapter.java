@@ -30,8 +30,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 
 public class CheckListAdapter extends RecyclerView.Adapter implements Page1_ItemTouchHelperCallback.ItemTuchHelpListener{
 
@@ -69,9 +71,18 @@ public class CheckListAdapter extends RecyclerView.Adapter implements Page1_Item
         this.listItems = listItems;
         this.context = context;
         this.fragment =fragment;
+        setDataforG(listItems);
 
     }//constructor
-
+   // public SimpleDateFormat date= new SimpleDateFormat("yyyyMMdd");
+    //리스트를 G에 저장하기위한
+    private void setDataforG(ArrayList<Page1_listItem> listItems){
+        if(listItems==null || listItems.size()==0){
+            G.setTodoDatas(null);
+            return;
+        }
+         G.setTodoDatas(listItems);
+    }//setStatics
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
@@ -227,6 +238,7 @@ public class CheckListAdapter extends RecyclerView.Adapter implements Page1_Item
                 lineStyle(tv_desc,btn_modify);
                 reflashRList();
                 if(saveList()){
+
                     //TODO 저장하기 만들기 / 버튼 커스텀
                     Toast.makeText(context, "save all", Toast.LENGTH_SHORT).show();
                     reflashRList();
@@ -318,6 +330,7 @@ public class CheckListAdapter extends RecyclerView.Adapter implements Page1_Item
     }
     void reflashRList(){
         notifyDataSetChanged();
+        setDataforG(listItems);
 
     /*    Message msg = new Message();
         Bundle data= new Bundle();
@@ -328,6 +341,7 @@ public class CheckListAdapter extends RecyclerView.Adapter implements Page1_Item
 
     }//reflashRList()
     //절취선
+
     void lineStyle(View v, Button b){
         b.setVisibility(View.GONE);
         ((TextView) v).setPaintFlags( ((TextView) v).getPaintFlags()|Paint.STRIKE_THRU_TEXT_FLAG);

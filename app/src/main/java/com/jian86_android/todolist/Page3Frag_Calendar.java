@@ -5,6 +5,7 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -31,17 +32,22 @@ import com.prolificinteractive.materialcalendarview.DayViewDecorator;
 import com.prolificinteractive.materialcalendarview.DayViewFacade;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
+import com.prolificinteractive.materialcalendarview.spans.DotSpan;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.Executors;
 
 public class Page3Frag_Calendar extends Fragment {
 
     Context context;
-    ImageView action_addbtn;
+   // ImageView action_addbtn;
     RelativeLayout action_addbg;
     MaterialCalendarView materialCalendarView;
     @Nullable
@@ -57,10 +63,10 @@ public class Page3Frag_Calendar extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        action_addbtn = view.findViewById(R.id.action_addbtn);
+     //   action_addbtn = view.findViewById(R.id.action_addbtn);
         action_addbg = view.findViewById(R.id.action_addbg);
         //dialog 창 띄우기
-        action_addbtn.setOnClickListener(ClickListener);
+    //    action_addbtn.setOnClickListener(ClickListener);
         materialCalendarView = view.findViewById(R.id.calendarView);
         materialCalendarView.state().edit()
                 .setFirstDayOfWeek(Calendar.SUNDAY)
@@ -73,12 +79,32 @@ public class Page3Frag_Calendar extends Fragment {
                 new SaturdayDecorator(),
                 new OneDayDecorator()
         );
+
+
         //클릭이벤트
         materialCalendarView.setOnDateChangedListener(onDateSelectedListener);
+       settingdot();
 
     }//onViewCreated
 
-    OnDateSelectedListener onDateSelectedListener = new OnDateSelectedListener() {
+    void settingdot() {
+        SimpleDateFormat date= new SimpleDateFormat("yyyy-MM-dd");
+        Date today = new Date();
+        String day = date.format(today);
+        if(G.getTodoDatas()!=null&&G.getTodoDatas().size()!=0) {
+            String[] result = new String[1];
+            result[0] = day;
+            new ApiSimulator(result).executeOnExecutor(Executors.newSingleThreadExecutor());
+        }
+
+
+    }
+
+
+
+
+
+        OnDateSelectedListener onDateSelectedListener = new OnDateSelectedListener() {
         @Override
         public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
             //showTimepicDial();
@@ -105,11 +131,11 @@ public class Page3Frag_Calendar extends Fragment {
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
-                case R.id.action_addbtn : // TODO: +버튼 눌럿을때 액션
-                   // boolIsShowAddDial(true);
-                    CalendarDay date = CalendarDay.today();
-                    selectDate(date);
-                    break;
+//                case R.id.action_addbtn : // TODO: +버튼 눌럿을때 액션
+//                   // boolIsShowAddDial(true);
+//                    CalendarDay date = CalendarDay.today();
+//                    selectDate(date);
+//                    break;
             }//onClick
         }
         //ClickListener
@@ -221,6 +247,80 @@ public class OneDayDecorator implements DayViewDecorator {
         @Override
         public void decorate(DayViewFacade view) {
             view.addSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.colorDeepBlue)));
+        }
+    }
+
+
+    private class ApiSimulator extends AsyncTask<Void, Void, List<CalendarDay>> {
+
+        String[] Time_Result;
+
+        ApiSimulator(String[] Time_Result){
+            this.Time_Result = Time_Result;
+        }
+
+        @Override
+        protected List<CalendarDay> doInBackground(@NonNull Void... voids) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            Calendar calendar = Calendar.getInstance();
+            ArrayList<CalendarDay> dates = new ArrayList<>();
+
+            /*특정날짜 달력에 점표시해주는곳*/
+            /*월은 0이 1월 년,일은 그대로*/
+            //string 문자열인 Time_Result 을 받아와서 -를 기준으로짜르고 string을 int 로 변환
+            for(int i = 0 ; i < Time_Result.length ; i ++){
+                CalendarDay day = CalendarDay.from(calendar);
+                String[] time = Time_Result[i].split("-");
+                int year = Integer.parseInt(time[0]);
+                int month = Integer.parseInt(time[1]);
+                int dayy = Integer.parseInt(time[2]);
+
+                dates.add(day);
+                calendar.set(year,month-1,dayy);
+            }
+
+            return dates;
+        }
+
+        @Override
+        protected void onPostExecute(@NonNull List<CalendarDay> calendarDays) {
+            super.onPostExecute(calendarDays);
+
+            if (getActivity().isFinishing()) {
+                return;
+            }
+
+            materialCalendarView.addDecorator(new EventDecorator(Color.RED, calendarDays,getActivity()));
+        }
+
+    }
+    //이벤트
+    public class EventDecorator implements DayViewDecorator {
+
+       // private final Drawable drawable;
+        private int color;
+        private HashSet<CalendarDay> dates;
+
+        public EventDecorator(int color, Collection<CalendarDay> dates, Context context) {
+        //    drawable = context.getResources().getDrawable(R.drawable.more);
+            this.color = color;
+            this.dates = new HashSet<>(dates);
+        }
+
+        @Override
+        public boolean shouldDecorate(CalendarDay day) {
+            return dates.contains(day);
+        }
+
+        @Override
+        public void decorate(DayViewFacade view) {
+          //  view.setSelectionDrawable(drawable);
+            view.addSpan(new DotSpan(5, color)); // 날자밑에 점
         }
     }
 //////////////////////////////////////////////////////////////////////////////

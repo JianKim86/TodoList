@@ -1,6 +1,7 @@
 package com.jian86_android.todolist;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
@@ -13,6 +14,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -22,9 +24,15 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
 public class MainActivity extends AppCompatActivity {
   //  DrawerLayout drawerLayout;
  //  NavigationView nav;
+    String sort = "userid";
+    private DbOpenHelper mDbOpenHelper;
     Toolbar toolbar;
     TabLayout tab;
     ViewPager pager;
@@ -57,22 +65,7 @@ public class MainActivity extends AppCompatActivity {
         pager.setAdapter(adapter);
         tab.setupWithViewPager(pager);
 //4.set up nav
-//        drawerLayout =findViewById(R.id.drawer_layout);
-//        nav= findViewById(R.id.nav);
-//
-//        nav.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-//            @Override
-//            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-//                switch (menuItem.getItemId()){
-//                    case R.id.item1:break;
-//                    case R.id.item2:break;
-//                    case R.id.item3:break;
-//                    case R.id.item4:break;
-//                }//switch
-//                drawerLayout.closeDrawer(nav,true);
-//                return false;
-//            }//onNavigationItemSelected
-//        });//listener
+
 //5.setup subtitle
         getSupportActionBar().setTitle("Todo");
         getSupportActionBar().setSubtitle(checkListSubtitle);
@@ -84,11 +77,7 @@ public class MainActivity extends AppCompatActivity {
                 if(!isTbar) showToolbar();
                 if(tab.getText().equals("TODO")){
                     getSupportActionBar().setSubtitle(checkListSubtitle);
-//                    Fragment fragment = (Fragment) adapter.instantiateItem(pager,0);
-//                    if(fragment != null && fragment instanceof Page1Frag_Todo){
-//                        ((Page1Frag_Todo)fragment).hideKeyboard();
-//                        ((Page1Frag_Todo)fragment).showEmptymsg();
-//                    }
+
                 }
                 if(tab.getText().equals("SHOPPING")){ getSupportActionBar().setSubtitle(shoppingListSubtitle);  }
                 if(tab.getText().equals("CALENDAR")){ getSupportActionBar().setSubtitle(etcListSubtitle);  }
@@ -107,6 +96,11 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });//listener
+      //DB
+        mDbOpenHelper = new DbOpenHelper(this);
+        mDbOpenHelper.open();
+        mDbOpenHelper.create();
+        showDatabase(sort);
     }//onCreate
 
     @Override
@@ -146,78 +140,58 @@ public class MainActivity extends AppCompatActivity {
     void hideToolbar() {if(isTbar){getSupportActionBar().hide(); isTbar = false;} }
     void showToolbar() {if(!isTbar){getSupportActionBar().show(); isTbar = true;} }
 
-//    Handler handlerEmptyList = new Handler(){
-//        @Override
-//        public void handleMessage(Message msg) {
-//            Bundle data = msg.getData();
-//            boolean changeList = data.getBoolean("EmptyList");
-//            int listPosition = data.getInt("ListPosition");
-//
-//            if(changeList) {
-//                Toast.makeText(MainActivity.this, "change", Toast.LENGTH_SHORT).show();
-//                Fragment fragment = (Fragment) adapter.instantiateItem(pager,listPosition);
-//                if(fragment != null && fragment instanceof Page1Frag_Todo){
-//                    //플레그먼트 접근 ->노티피
-//                   // ((Page1Frag_Todo)fragment).notifyList();
-//                   // ((Page1Frag_Todo)fragment).showEmptymsg();
-//                }
-//                else if(fragment != null && fragment instanceof Page2Frag_Shopping){
-//                    //플레그먼트 접근 ->노티피
-//                    ((Page2Frag_Shopping)fragment).notifyList();
-//                   // ((Page2Frag_Shopping)fragment).showEmptymsg();
-//                }
-//            }
-//        }//handleMessage
-//    };//handler
-//    Handler handler = new Handler(){
-//        @Override
-//        public void handleMessage(Message msg) {
-//           Bundle data = msg.getData();
-//           boolean changeList = data.getBoolean("ChangeList");
-//           int listPosition = data.getInt("ListPosition");
-//           if(changeList) {
-//               //Toast.makeText(MainActivity.this, "change", Toast.LENGTH_SHORT).show();
-//               Fragment fragment = (Fragment) adapter.instantiateItem(pager,listPosition);
-//                   if(fragment != null && fragment instanceof Page1Frag_Todo){
-//                      //플레그먼트 접근 ->노티피
-//                       ((Page1Frag_Todo)fragment).notifyList();
-//                   }
-//                   else if(fragment != null && fragment instanceof Page2Frag_Shopping){
-//                       //플레그먼트 접근 ->노티피
-//                       ((Page2Frag_Shopping)fragment).notifyList();
-//                   }
-//               }
-//        }//handleMessage
-//    };//handler
-
-//    Handler handlerTop = new Handler(){
-//        @Override
-//        public void handleMessage(Message msg) {
-//            //TODO: top 설정
-//            Bundle data = msg.getData();
-//            boolean isfocuce = data.getBoolean("IsFocuce");
-//            if(isfocuce) hideToolbar();
-//            else showToolbar();
-//        }//handleMessage
-//    };//handlerTop
 
     @Override
     protected void onResume() {
         super.onResume();
 
+
+
+    }
+    public SimpleDateFormat date= new SimpleDateFormat("yyyy-MM-dd");
+    public void showDatabase(String sort){
+        Cursor iCursor = mDbOpenHelper.sortColumn(sort);
+        Log.d("showDatabase", "DB Size: " + iCursor.getCount());
+       // G.getTodoDatas().clear();
+        ArrayList<Page1_listItem>gSetTodo= new ArrayList<>();
+        while(iCursor.moveToNext()){
+            String tempIndex = iCursor.getString(iCursor.getColumnIndex("_id"));
+            String TODODesc = iCursor.getString(iCursor.getColumnIndex("TODODesc"));
+            String TODOstatu = iCursor.getString(iCursor.getColumnIndex("TODOstatu"));
+            String TODOday = iCursor.getString(iCursor.getColumnIndex("TODOday"));
+            Date today = new Date();
+            String day = date.format(today);
+            if(TODOday.equals(day)){
+                Page1_listItem p = new Page1_listItem(TODODesc,TODOstatu.equals("Y")?true:false);
+                gSetTodo.add(p);
+            }
+        }
+        G.setTodoDatas(gSetTodo);
+    }
+    @Override
+    protected void onPause() {
+
+        super.onPause();
+        saveDB();
+        Toast.makeText(this, "종료", Toast.LENGTH_SHORT).show();
+
     }
 
-//    private void hideKeyboard() {
-//        imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY,0);
-//        ((G)(this.getApplicationContext())).setG_Keybord(false);
-//        isKeybord =  G_SET.isG_Keybord();
-//
-//
-//    }
-//    private void showKeyboard(){
-//        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
-//        ((G)(this.getApplicationContext())).setG_Keybord(true);
-//        isKeybord =  G_SET.isG_Keybord();
-//
-//    }
+    //sqlite에 저장
+    private void saveDB(){
+
+        mDbOpenHelper.open();
+        mDbOpenHelper.deleteAllColumns();
+        Date today = new Date();
+        String day = date.format(today);
+        if(G.getTodoDatas()!=null&&G.getTodoDatas().size()!=0){
+
+            for(Page1_listItem p : G.getTodoDatas()) {
+                mDbOpenHelper.insertColumn(p.getDesc(), (p.isCheck())?"Y":"N",day);
+            }
+
+        }
+       if(G.getTodoDatas()!=null&&G.getTodoDatas().size()!=0) G.getTodoDatas().clear();
+        G.setTodoDatas(null);
+    }
 }//MainActivity
